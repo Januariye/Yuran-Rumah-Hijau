@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yuran Rumah Hijau</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f8e9;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #2e7d32;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #a5d6a7;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #c8e6c9;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin: 10px 5px 0 0;
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    .status {
+      background-color: #a5d6a7;
+    }
+    #jumlah {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Senarai Yuran Rumah Hijau</h2>
+
+<table id="feeTable">
+  <thead>
+    <tr>
+      <th>Bil</th>
+      <th>Nama Pelajar</th>
+      <th>Jumlah Bayaran (RM)</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody">
+    <!-- Baris pelajar akan dimasukkan secara automatik -->
+  </tbody>
+</table>
+
+<div id="jumlah">Jumlah kutipan: RM0.00</div>
+
+<div style="margin-top: 15px;">
+  <button onclick="addRow()">Tambah Pelajar</button>
+  <button onclick="saveData()">Simpan</button>
+  <button onclick="sendWhatsApp()">Hantar ke WhatsApp</button>
+</div>
+
+<script>
+  let pelajarList = JSON.parse(localStorage.getItem("pelajarHijau")) || [];
+
+  function renderTable() {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+    let total = 0;
+
+    pelajarList.forEach((item, index) => {
+      const row = document.createElement("tr");
+
+      total += 15; // Semua bayar RM15
+
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td><input type="text" value="${item.nama}" onchange="updateData(${index}, this.value)"></td>
+        <td><input type="number" value="15" readonly></td>
+        <td class="status">Telah Bayar</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById("jumlah").textContent = "Jumlah kutipan: RM" + total.toFixed(2);
+  }
+
+  function updateData(index, nama) {
+    pelajarList[index].nama = nama;
+    saveData(false);
+    renderTable();
+  }
+
+  function addRow() {
+    pelajarList.push({ nama: "", bayar: 15 });
+    renderTable();
+  }
+
+  function saveData(showAlert = true) {
+    pelajarList.forEach(p => p.bayar = 15); // pastikan semua tetap RM15
+    localStorage.setItem("pelajarHijau", JSON.stringify(pelajarList));
+    if (showAlert) alert("Data berjaya disimpan!");
+  }
+
+  function sendWhatsApp() {
+    if (pelajarList.length === 0) {
+      alert("Tiada pelajar dalam senarai.");
+      return;
+    }
+
+    let msg = "*Senarai Yuran Rumah Hijau*\n\n";
+    pelajarList.forEach((item, i) => {
+      msg += `${i + 1}. ${item.nama} - RM15.00 (Telah Bayar)\n`;
+    });
+
+    msg += `\nJumlah kutipan: RM${(pelajarList.length * 15).toFixed(2)}`;
+
+    const encodedMsg = encodeURIComponent(msg);
+    const phone = "60187829937";
+    if (confirm("Hantar mesej ke WhatsApp sekarang?")) {
+      window.open(`https://wa.me/${phone}?text=${encodedMsg}`, "_blank");
+    }
+  }
+
+  // Auto render masa buka
+  renderTable();
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmq82vAKRv0MXnCrR_cmsV80aLOMlt_Y4",
+    authDomain: "yuran-rumah-hijau.firebaseapp.com",
+    projectId: "yuran-rumah-hijau",
+    storageBucket: "yuran-rumah-hijau.firebasestorage.app",
+    messagingSenderId: "743627969027",
+    appId: "1:743627969027:web:74c3e4b2693cfaad19f436"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+
+</body>
+</html>
